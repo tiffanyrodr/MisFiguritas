@@ -9,6 +9,7 @@ export default function App() {
   const [locationPermission, requestLocationPermission] = Location.useForegroundPermissions();
   const [fotos, setFotos] = useState([]);
   const [descripcion, setDescripcion] = useState('');
+  const [pantalla, setPantalla] = useState('camara');
   const camaraRef = useRef(null);
 
   if (!permission?.granted || !locationPermission?.granted) {
@@ -41,6 +42,32 @@ export default function App() {
     setDescripcion('');
   };
 
+  if (pantalla === 'galeria') {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.titulo}>Mis Fotos</Text>
+
+        <TouchableOpacity style={styles.boton} onPress={() => setPantalla('camara')}>
+          <Text>Ir a la cámara</Text>
+        </TouchableOpacity>
+
+        <FlatList
+          data={fotos}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View style={styles.tarjeta}>
+              <Image source={{ uri: item.uri }} style={styles.foto} />
+              <Text>Lat: {item.latitud}</Text>
+              <Text>Lon: {item.longitud}</Text>
+              <Text>{item.descripcion}</Text>
+            </View>
+          )}
+          ListEmptyComponent={<Text>No hay fotos todavía</Text>}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Bitácora Geográfica</Text>
@@ -58,18 +85,9 @@ export default function App() {
         <Text>Tomar Foto</Text>
       </TouchableOpacity>
 
-      <FlatList
-        data={fotos}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View>
-            <Image source={{ uri: item.uri }} style={styles.foto} />
-            <Text>Lat: {item.latitud}</Text>
-            <Text>Lon: {item.longitud}</Text>
-            <Text>{item.descripcion}</Text>
-          </View>
-        )}
-      />
+      <TouchableOpacity style={styles.botonGaleria} onPress={() => setPantalla('galeria')}>
+        <Text>Ver fotos ({fotos.length})</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -103,9 +121,23 @@ const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 8,
   },
-  foto: {
-    width: 100,
-    height: 100,
+  botonGaleria: {
+    backgroundColor: 'lightblue',
+    padding: 10,
     margin: 5,
+    borderRadius: 8,
+  },
+  tarjeta: {
+    alignItems: 'center',
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 8,
+  },
+  foto: {
+    width: 200,
+    height: 200,
+    marginBottom: 5,
   },
 });
