@@ -2,18 +2,23 @@ import { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Audio } from 'expo-av';
+import * as Location from 'expo-location';
 
 export default function App() {
   const [permission, requestPermission] = useCameraPermissions();
+  const [locationPermission, requestLocationPermission] = Location.useForegroundPermissions();
   const [fotos, setFotos] = useState([]);
   const camaraRef = useRef(null);
 
-  if (!permission?.granted) {
+  if (!permission?.granted || !locationPermission?.granted) {
     return (
       <View style={styles.container}>
-        <Text>Necesitamos permiso de cámara</Text>
-        <TouchableOpacity onPress={requestPermission}>
-          <Text>Dar permiso</Text>
+        <Text>Necesitamos permisos de cámara y ubicación</Text>
+        <TouchableOpacity onPress={() => {
+          requestPermission();
+          requestLocationPermission();
+        }}>
+          <Text>Dar permisos</Text>
         </TouchableOpacity>
       </View>
     );
@@ -22,17 +27,21 @@ export default function App() {
   const tomarFoto = async () => {
     const foto = await camaraRef.current.takePictureAsync();
 
+    const ubicacion = await Location.getCurrentPositionAsync({});
+    const latitud = ubicacion.coords.latitude.toFixed(6);
+    const longitud = ubicacion.coords.longitude.toFixed(6);
+
     const { sound } = await Audio.Sound.createAsync(
       require('./assets/sounds/shutter.mp3')
     );
     await sound.playAsync();
 
-    setFotos([...fotos, foto.uri]);
+    setFotos([...fotos, { uri: foto.uri, latitud, longitud }]);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Mis Figuritas Repetidas</Text>
+      <Text style={styles.titulo}>Bitácora Geográfica</Text>
 
       <CameraView style={styles.camara} ref={camaraRef} />
 
@@ -44,7 +53,11 @@ export default function App() {
         data={fotos}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <Image source={{ uri: item }} style={styles.foto} />
+          <View>
+            <Image source={{ uri: item.uri }} style={styles.foto} />
+            <Text>Lat: {item.latitud}</Text>
+            <Text>Lon: {item.longitud}</Text>
+          </View>
         )}
       />
     </View>
