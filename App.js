@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, Image, StyleSheet, TextInput } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Audio } from 'expo-av';
 import * as Location from 'expo-location';
@@ -8,6 +8,7 @@ export default function App() {
   const [permission, requestPermission] = useCameraPermissions();
   const [locationPermission, requestLocationPermission] = Location.useForegroundPermissions();
   const [fotos, setFotos] = useState([]);
+  const [descripcion, setDescripcion] = useState('');
   const camaraRef = useRef(null);
 
   if (!permission?.granted || !locationPermission?.granted) {
@@ -36,7 +37,8 @@ export default function App() {
     );
     await sound.playAsync();
 
-    setFotos([...fotos, { uri: foto.uri, latitud, longitud }]);
+    setFotos([...fotos, { uri: foto.uri, latitud, longitud, descripcion }]);
+    setDescripcion('');
   };
 
   return (
@@ -44,6 +46,13 @@ export default function App() {
       <Text style={styles.titulo}>Bitácora Geográfica</Text>
 
       <CameraView style={styles.camara} ref={camaraRef} />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Escribe una descripción..."
+        value={descripcion}
+        onChangeText={setDescripcion}
+      />
 
       <TouchableOpacity style={styles.boton} onPress={tomarFoto}>
         <Text>Tomar Foto</Text>
@@ -57,6 +66,7 @@ export default function App() {
             <Image source={{ uri: item.uri }} style={styles.foto} />
             <Text>Lat: {item.latitud}</Text>
             <Text>Lon: {item.longitud}</Text>
+            <Text>{item.descripcion}</Text>
           </View>
         )}
       />
@@ -78,6 +88,14 @@ const styles = StyleSheet.create({
   camara: {
     width: '90%',
     height: 250,
+  },
+  input: {
+    width: '90%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    marginVertical: 8,
+    borderRadius: 8,
   },
   boton: {
     backgroundColor: 'yellow',
