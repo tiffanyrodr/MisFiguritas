@@ -10,18 +10,33 @@ export default function App() {
   const [figuritas, setFiguritas] = useState([]);
   const [descripcion, setDescripcion] = useState('');
   const [pantalla, setPantalla] = useState('camara');
+  const [denegado, setDenegado] = useState(false);
   const camaraRef = useRef(null);
 
   if (!permission?.granted || !locationPermission?.granted) {
     return (
-      <View style={styles.container}>
-        <Text>Necesitamos permisos de cámara y ubicación</Text>
-        <TouchableOpacity onPress={() => {
-          requestPermission();
-          requestLocationPermission();
-        }}>
-          <Text>Dar permisos</Text>
-        </TouchableOpacity>
+      <View style={styles.fondoPermisos}>
+        <View style={styles.cuadroPermisos}>
+          {denegado ? (
+            <Text style={styles.textoDenegado}>
+              La app necesita los permisos para funcionar correctamente.
+            </Text>
+          ) : (
+            <Text style={styles.textoPermisos}>
+              Necesitamos permisos de cámara y ubicación
+            </Text>
+          )}
+          <TouchableOpacity style={styles.btnPermitir} onPress={() => {
+            setDenegado(false);
+            requestPermission();
+            requestLocationPermission();
+          }}>
+            <Text style={{ color: 'white' }}>Permitir</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.btnDenegar} onPress={() => setDenegado(true)}>
+            <Text>No permitir</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -96,6 +111,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
+    alignItems: 'center',
+  },
+  fondoPermisos: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+  },
+  cuadroPermisos: {
+    backgroundColor: 'white',
+    padding: 30,
+    borderRadius: 12,
+    alignItems: 'center',
+    width: '80%',
+    gap: 10,
+  },
+  textoPermisos: {
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 15,
+  },
+  textoDenegado: {
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 15,
+    color: 'red',
+  },
+  btnPermitir: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+  },
+  btnDenegar: {
+    backgroundColor: '#ddd',
+    padding: 10,
+    borderRadius: 8,
+    width: '100%',
     alignItems: 'center',
   },
   titulo: {
