@@ -7,7 +7,7 @@ import * as Location from 'expo-location';
 export default function App() {
   const [permission, requestPermission] = useCameraPermissions();
   const [locationPermission, requestLocationPermission] = Location.useForegroundPermissions();
-  const [fotos, setFotos] = useState([]);
+  const [figuritas, setFiguritas] = useState([]);
   const [descripcion, setDescripcion] = useState('');
   const [pantalla, setPantalla] = useState('camara');
   const camaraRef = useRef(null);
@@ -38,31 +38,31 @@ export default function App() {
     );
     await sound.playAsync();
 
-    setFotos([...fotos, { uri: foto.uri, latitud, longitud, descripcion }]);
+    setFiguritas([...figuritas, { uri: foto.uri, latitud, longitud, descripcion }]);
     setDescripcion('');
   };
 
-  if (pantalla === 'galeria') {
+  if (pantalla === 'repetidas') {
     return (
       <View style={styles.container}>
-        <Text style={styles.titulo}>Mis Fotos</Text>
+        <Text style={styles.titulo}>Mis Repetidas</Text>
 
         <TouchableOpacity style={styles.boton} onPress={() => setPantalla('camara')}>
-          <Text>Ir a la cámara</Text>
+          <Text>Agregar figurita</Text>
         </TouchableOpacity>
 
         <FlatList
-          data={fotos}
+          data={figuritas}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View style={styles.tarjeta}>
               <Image source={{ uri: item.uri }} style={styles.foto} />
+              <Text>{item.descripcion}</Text>
               <Text>Lat: {item.latitud}</Text>
               <Text>Lon: {item.longitud}</Text>
-              <Text>{item.descripcion}</Text>
             </View>
           )}
-          ListEmptyComponent={<Text>No hay fotos todavía</Text>}
+          ListEmptyComponent={<Text>No tenés figuritas repetidas todavía</Text>}
         />
       </View>
     );
@@ -70,23 +70,23 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Bitácora Geográfica</Text>
+      <Text style={styles.titulo}>Mis Figuritas</Text>
 
       <CameraView style={styles.camara} ref={camaraRef} />
 
       <TextInput
         style={styles.input}
-        placeholder="Escribe una descripción..."
+        placeholder="Jugador y cantidad (ej: Mbappe x3)"
         value={descripcion}
         onChangeText={setDescripcion}
       />
 
       <TouchableOpacity style={styles.boton} onPress={tomarFoto}>
-        <Text>Tomar Foto</Text>
+        <Text>Guardar figurita</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.botonGaleria} onPress={() => setPantalla('galeria')}>
-        <Text>Ver fotos ({fotos.length})</Text>
+      <TouchableOpacity style={styles.botonGaleria} onPress={() => setPantalla('repetidas')}>
+        <Text>Ver repetidas ({figuritas.length})</Text>
       </TouchableOpacity>
     </View>
   );
